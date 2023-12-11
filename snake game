@@ -1,0 +1,108 @@
+import pygame
+import time
+import random
+
+pygame.init()
+
+# Colors
+white = (255, 255, 255)
+green = (0, 255, 0)
+red = (255, 0, 0)
+
+# Snake Speed
+snake_speed = 15
+
+# Snake Size
+snake_size = 20
+
+# Game Screen Size
+width = 640
+height = 480
+
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption('Snake Game')
+
+# Clock for the game loop
+clock = pygame.time.Clock()
+
+snake_pos = [[100, 50], [90, 50], [80, 50], [70, 50]]
+snake_speed = [0, 0]
+food_pos = [random.randrange(1, (width//snake_size)) * snake_size,
+             random.randrange(1, (height//snake_size)) * snake_size]
+food_spawn = True
+direction = "RIGHT"
+change_to = direction
+
+score = 0
+
+game_over = False
+
+def draw_objects():
+    global score, food_spawn
+
+    screen.fill(white)
+
+    # Draw snake
+    for pos in snake_pos:
+        pygame.draw.rect(screen, green, pygame.Rect(pos[0], pos[1], snake_size, snake_size))
+
+    # Draw food
+    pygame.draw.rect(screen, red, pygame.Rect(food_pos[0], food_pos[1], snake_size, snake_size))
+
+    # Update the display
+    pygame.display.flip()
+
+    # Update score
+    score_font = pygame.font.Font(None, 36)
+    score_text = score_font.render("Score: " + str(score), True, black)
+    screen.blit(score_text, [5, 5])
+
+def snake_move():
+    global direction, snake_speed, game_over
+
+    new_pos = [snake_pos[0][0] + snake_speed[0], snake_pos[0][1] + snake_speed[1]]
+
+    snake_pos.insert(0, new_pos)
+
+    if new_pos == food_pos:
+        food_spawn = False
+        score += 1
+    else:
+        snake_pos.pop()
+
+    if new_pos[0] < 0 or new_pos[0] >= width or new_pos[1] < 0 or new_pos[1] >= height:
+        game_over = True
+    elif len(snake_pos) > 1 and new_pos in snake_pos[1:]:
+        game_over = True
+
+    if game_over:
+        print('Game Over')
+        pygame.quit()
+
+def get_food():
+    global food_pos, food_spawn
+
+    food_pos = [random.randrange(1, (width//snake_size)) * snake_size,
+                random.randrange(1, (height//snake_size)) * snake_size]
+    food_spawn = True
+
+def change_direction(event):
+    global change_to
+
+    if event.key == pygame.K_UP and direction != "DOWN":
+        change_to = "UP"
+    elif event.key == pygame.K_DOWN and direction != "UP":
+        change_to = "DOWN"
+    elif event.key == pygame.K_LEFT and direction != "RIGHT":
+        change_to = "LEFT"
+    elif event.key == pygame.K_RIGHT and direction != "LEFT":
+        change_to = "RIGHT"
+
+def game_loop():
+    global direction, snake_speed, food_spawn
+
+    while not game_over:
+        clock.tick(snake_speed)
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN
